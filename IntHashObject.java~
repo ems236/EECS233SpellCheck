@@ -1,0 +1,24 @@
+public class IntHashObject
+{
+  private String data;
+  
+  public IntHashObject(String data)
+  {
+    this.data = data;
+  }
+  
+  public void setData(String data)
+  {
+    this.data = data;
+  }
+  
+  public void delete()
+  {
+    data = null;
+  }
+  
+  public String getData()
+  {
+    return data;
+  }
+}

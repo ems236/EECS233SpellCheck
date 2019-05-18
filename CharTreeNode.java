@@ -1,0 +1,92 @@
+public class CharTreeNode
+{
+  private boolean data;
+  private CharTreeNode[] children = new CharTreeNode[26];
+  private int childCount = 0;
+  
+  public CharTreeNode(boolean data)
+  {
+    this.data = data;
+  }
+  
+  public void changeCount(boolean upDown)
+  {
+    if(upDown)
+    {
+      childCount++;
+    }
+    
+    else
+    {
+      childCount--;
+    }
+  }
+  
+  public int getCount()
+  {
+    return childCount;
+  }
+  
+  public boolean isWord()
+  {
+    return data;
+  }
+  
+  public void setData(boolean val)
+  {
+    data = val;
+  }
+  
+  public boolean hasChild(char letter)
+  {
+    //convert char to int
+    int index = charToInt(letter);    
+    if(index == -1)
+    {
+      return false;
+    }
+    
+    else if(children[index] != null)
+    {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  public CharTreeNode getChild(char letter)
+  {
+    int index = charToInt(letter);    
+    if(index == -1)
+    {
+      return null;
+    }
+    return children[index];
+  }
+  
+  public boolean addChild(char letter)
+  {
+    int index = charToInt(letter);    
+    if(index != -1)
+    {
+      children[index] = new CharTreeNode(false);
+      return true;
+    }
+    
+    else
+    {
+      return false;
+    }
+  }
+  
+  public int charToInt(char letter)
+  {
+    int intVal = (int)letter - 97;
+    if(intVal < 0 || intVal > 25)
+    {
+      return -1;
+    }
+    
+    return intVal;
+  }
+}

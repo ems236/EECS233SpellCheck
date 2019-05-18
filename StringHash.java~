@@ -1,0 +1,144 @@
+import java.math.BigInteger;
+
+public class StringHash implements Dict
+{
+  //hash values of strings are unique and nonzero (hash("") = 0, but that's not a word anyway).
+   
+  //about 370000 words in dict, make hash table bigger so it's sparse
+  //2000003 is prime so double hashing is slightly more reliable.
+  
+  //use object so more information is stored about if has been deleted or not.  
+  //If the object is initialized, it's been used.
+  private IntHashObject[] hashData = new IntHashObject[2000003];
+  private int longestWord = 0;
+  
+  public StringHash()
+  {
+    //don't need to initialize anything?
+  }
+  
+  public boolean add(String word)
+  {
+    if(word.length() > longestWord)
+    {
+      longestWord = word.length();
+    }
+    
+    int hash = Math.abs(word.hashCode()) % 2000003;
+    int hash2 = Math.abs(word.hashCode()) % 2000001;
+    if(hash2 == 0)
+    {   
+      hash2 = 1;
+    }
+    
+    //add to table, double hash for collisions
+    while(hashData[hash] != null && hashData[hash].getData() != null)
+    {
+      hash = (hash + hash2) % 2000003;
+    }
+    
+    if(hashData[hash] == null)
+    {
+      hashData[hash] = new IntHashObject(word);
+    }
+    else
+    {
+      hashData[hash].setData(word); 
+    }
+    return true;
+  }
+  
+  public boolean isWord(String word)
+  {
+    int hash = Math.abs(word.hashCode()) % 2000003;
+    int hash2 = Math.abs(word.hashCode()) % 2000001;
+    if(hash2 == 0)
+    {   
+      hash2 = 1;
+    }
+    
+    if(hash < 0)
+    {
+    	System.out.println(word);
+    	return false;
+    }
+    //search hashtable, false if a null
+    while(hashData[hash] == null || (hashData[hash].getData() == null || !hashData[hash].getData().equals(word)))
+    {
+      if(hashData[hash] == null)
+      {
+        return false;
+      }
+      hash = (hash + hash2) % 2000003;
+    }
+    return true;
+  }
+  
+  public boolean delete(String word)
+  {
+    int hash = Math.abs(word.hashCode()) % 2000003;
+    int hash2 = Math.abs(word.hashCode()) % 2000001;
+    if(hash2 == 0)
+    {   
+      hash2 = 1;
+    }
+    
+    while(hashData[hash] == null || (hashData[hash].getData() == null || !hashData[hash].getData().equals(word)))
+    {
+      if(hashData[hash] == null)
+      {
+        return false;
+      }
+      hash = (hash + hash2) % 2000003;
+    }
+    
+    //set data to null
+    hashData[hash].delete();
+    return true;
+  }
+  
+  public String autoComplete(String word)
+  {
+	  //could make this work a lot better, but would have to do the same thing done in TreeHash
+	  //would have to store child info in the object and do a ton of lookups in add and delete.
+	  //this one adds and deletes fast but searches slow af
+	  
+	  BigInteger i = new BigInteger("0");
+	  System.out.println(BigInteger.valueOf(26).pow(longestWord - word.length()));
+	  while(i.compareTo(BigInteger.valueOf(26).pow(longestWord - word.length())) < 0)
+	  {
+		  String next = numToWord(i);
+		  if(isWord(word + next))
+		  {
+			return word + next;  
+		  }
+		  i = i.add(BigInteger.valueOf(1));
+	  }
+	  
+	  return null;
+  }
+  
+  public String numToWord(BigInteger num)
+  {
+	  String output = "";
+	  boolean next = false;
+	  boolean done = false;
+	  while(!done)
+	  {
+		  output = (char)(num.mod(BigInteger.valueOf(26)).intValue() + 97) + output; 
+		  num = num.divide(BigInteger.valueOf(26));
+		  
+		  if(num.equals(BigInteger.valueOf(0)))
+		  {
+			  next = true;
+		  }
+		  
+		  if(next)
+		  {
+			  done = true;
+		  }
+	  }
+	  
+	  return output;
+  }
+}

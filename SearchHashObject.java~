@@ -1,0 +1,45 @@
+public class SearchHashObject
+{
+  private String data;
+  private int children = 0;
+  private boolean isWord = false;
+  
+  public SearchHashObject(String data, boolean isWord)
+  {
+    this.data = data;
+    this.isWord = isWord;
+    
+    if(!isWord)
+    {
+      children++;
+    }
+  }
+  
+  public void setData(String data)
+  {
+    this.data = data;
+  }
+  
+  public void changeCount(boolean upDown)
+  {
+    if(upDown)
+    {
+      containedCount++;
+    }
+    
+    else
+    {
+      containedCount--;
+    }
+  }
+  
+  public void delete()
+  {
+    isWord = false;
+  }
+  
+  public String getData()
+  {
+    return data;
+  }
+}

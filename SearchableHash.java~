@@ -1,0 +1,174 @@
+public class SearchableHash implements Dict
+{  
+  //about 370000 words in dict, make hash table bigger so it's sparse
+  //2000003 is prime so double hashing is slightly more reliable.
+   
+  //If the object is initialized, it's been used.
+  private SearchHashObject[] hashData = new SearchHashObject[2000003];
+  
+  public SearchableHash()
+  {
+    //don't need to initialize anything?
+  }
+  
+  public void addHash(String word, boolean isWord)
+  {
+    int hash = Math.abs(word.hashCode()) % 2000003;
+    int hash2 = Math.abs(word.hashCode()) % 2000001;
+    if(hash2 == 0)
+    {   
+      hash2 = 1;
+    }
+    
+    //add to table, double hash for collisions
+    while(hashData[hash] != null)
+    {
+      hash = (hash + hash2) % 2000003;
+    }
+    
+    hashData[hash] = new SearchHashObject(word, isWord);
+  }
+  
+  public int findHash(String word)
+  {
+    int hash = Math.abs(word.hashCode()) % 2000003;
+    int hash2 = Math.abs(word.hashCode()) % 2000001;
+    if(hash2 == 0)
+    {   
+      hash2 = 1;
+    }
+    
+    //add to table, double hash for collisions
+    while(hashData[hash] == null || !hashData[hash].getData().equals(word))
+    {
+      if(hashData[hash] == null)
+      {
+        return -1;
+      }
+      
+      hash = (hash + hash2) % 2000003;
+    }
+    
+    return hash;
+  }
+  
+  public boolean add(String word)
+  { 
+    //adjust count information at each word
+    for(int i = 1; i < word.length() - 1; i++)
+    {
+      int hash = findHash(word.substring(0,i));
+      if(hash == -1)
+      {
+        addHash(word.substring(0,i), false);
+      }
+      else
+      {
+        hashData[hash].changeCount(true);
+      }
+    }
+    
+    //handle actual word
+    int hash = findHash(word);
+    if(hash == -1)
+    {
+      addHash(word, true);
+    }
+    
+    else
+    {
+      //control for duplicate words, adjust counts again. 
+      if(hashData[hash].isWord())
+      {
+        for(int i = 1; i < word.length() - 1; i++)
+        {
+          hashData[findHash(word.substring(0,i))].changeCount(false);
+        }
+      }  
+      hashData[hash].setWord(true);
+    }
+    return true;
+  }
+  
+  public boolean isWord(String word)
+  {
+    int hash = findHash(word);
+    if(hash == -1)
+    {
+      return false;
+    }
+    else
+    {
+      return hashData[hash].isWord();
+    }
+  }
+  
+  public boolean delete(String word)
+  {
+    if(isWord(word))
+    {
+      //adjust count information at each word
+      for(int i = 1; i < word.length() - 1; i++)
+      {
+        hashData[findHash(word.substring(0,i))].changeCount(false);
+      }
+    
+      //handle actual word
+      hashData[findHash(word)].setWord(false);
+      return true;
+    }
+    
+    else
+    {
+      return false;
+    }
+  }
+  
+  public String autoComplete(String word)
+  {
+    int hash = findHash(word);
+    
+    if(hash == -1 || hashData[hash].getCount() == 0)
+    {
+      return null;
+    }
+    else
+    {
+      String current = word;
+      //look until it's found
+      boolean next;
+      while(true)
+      {
+        //use to break loop
+        next = false;
+        for(int i = 0; i < 26 || next; i++)
+        {
+          hash = findHash(current + (char)(97 + i));
+          if(hash != -1)
+          {
+            if(hashData[hash].isWord())
+            {
+              return hashData[hash].getData();
+            }
+            
+            else if(hashData[hash].getCount() > 0)
+            {
+              next = true;
+              current = current + (char)(97 + i);
+            }
+            
+            else
+            {
+              return null;
+            }
+          }
+        }
+        
+        if(!next)
+        {
+          return null;
+        }
+      }
+    }
+  }
+}
